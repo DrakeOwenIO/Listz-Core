@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { dbPing, pool } from "./core/db/pool";
 import { runMigrations } from "./migrate/runner";
+import { createList, listLists } from "./core/services/lists.service";
 
 async function main() {
   const command = process.argv[2];
@@ -23,10 +24,31 @@ async function main() {
       break;
     }
 
+    case "list:create": {
+      const name = process.argv.slice(3).join(" ");
+      const list = await createList(name);
+      console.log(`created list: ${list.id} "${list.name}"`);
+      break;
+    }
+    
+    case "list:ls": {
+      const lists = await listLists();
+      if (lists.length === 0) {
+        console.log("no lists found");
+        break;
+      }
+      for (const l of lists) {
+        console.log(`${l.id}  ${l.name}  (${l.createdAt.toISOString()})`);
+      }
+      break;
+    }
+
     case undefined: {
       console.log("Listz Core (CLI adapter)");
       console.log("Commands:");
       console.log("  db:ping   Test database connectivity");
+      console.log('  list:create "Name"');
+      console.log("  list:ls");
       process.exitCode = 0;
       break;
     }
