@@ -30,3 +30,16 @@ export async function getListRows(): Promise<ListRow[]> {
 
   return res.rows;
 }
+
+export async function getListRowById(id: string): Promise<ListRow | null> {
+    const res = await pool.query<ListRow>(
+      `
+      SELECT id, name, created_at
+      FROM lists
+      WHERE id = $1;
+      `,
+      [id]
+    );
+  
+    return res.rows[0] ?? null;
+  }

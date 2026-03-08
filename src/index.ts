@@ -2,6 +2,7 @@ import "dotenv/config";
 import { dbPing, pool } from "./core/db/pool";
 import { runMigrations } from "./migrate/runner";
 import { createList, listLists } from "./core/services/lists.service";
+import { addItem, listItems } from "./core/services/items.service";
 
 async function main() {
   const command = process.argv[2];
@@ -43,12 +44,50 @@ async function main() {
       break;
     }
 
+    case "item:add": {
+      const listId = process.argv[3];
+      const title = process.argv.slice(4).join(" ");
+    
+      if (!listId) {
+        throw new Error("Usage: item:add <listId> \"Item title\"");
+      }
+    
+      const item = await addItem(listId, title);
+      console.log(`created item: ${item.id} "${item.title}"`);
+      break;
+    }
+    
+    case "item:ls": {
+      const listId = process.argv[3];
+    
+      if (!listId) {
+        throw new Error("Usage: item:ls <listId>");
+      }
+    
+      const items = await listItems(listId);
+    
+      if (items.length === 0) {
+        console.log("no items found");
+        break;
+      }
+    
+      for (const item of items) {
+        console.log(
+          `${item.id}  ${item.title}  done=${item.isDone}  (${item.createdAt.toISOString()})`
+        );
+      }
+      break;
+    }
+
+    // Output some help commands to show what's avalible
     case undefined: {
       console.log("Listz Core (CLI adapter)");
       console.log("Commands:");
       console.log("  db:ping   Test database connectivity");
       console.log('  list:create "Name"');
       console.log("  list:ls");
+      console.log('  item:add <listId> "Title"');
+      console.log("  item:ls <listId>");
       process.exitCode = 0;
       break;
     }
