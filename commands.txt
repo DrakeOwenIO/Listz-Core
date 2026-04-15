@@ -1,0 +1,9 @@
+docker compose up -d
+npm run dev -- db:ping
+npm run dev -- migrate
+npm run dev -- list:create "Regression Test List"
+npm run dev -- list:ls
+
+npm run dev -- item:add <listId> "Test Item 1"
+npm run dev -- item:add <listId> "Test Item 2"
+npm run dev -- item:ls <listId>
